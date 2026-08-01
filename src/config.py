@@ -1,3 +1,8 @@
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
+
 from pathlib import Path
 
 
@@ -21,3 +26,15 @@ DATASETS = {
         "filename": "mrt_exits.geojson",
     },
 }
+
+POSTGRES_DB = os.environ["POSTGRES_DB"]
+POSTGRES_USER = os.environ["POSTGRES_USER"]
+POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "127.0.0.1")
+POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5433"))
+
+DATABASE_URL = (
+    f"postgresql+psycopg://{POSTGRES_USER}:"
+    f"{POSTGRES_PASSWORD}@{POSTGRES_HOST}:"
+    f"{POSTGRES_PORT}/{POSTGRES_DB}"
+)

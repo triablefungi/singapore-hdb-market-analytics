@@ -1,27 +1,27 @@
-import os
+from sqlalchemy import text
 
-from dotenv import load_dotenv
-from sqlalchemy import URL, create_engine, text
+from src.database import engine
 
 
-load_dotenv()
+def main() -> None:
+    with engine.connect() as connection:
+        result = connection.execute(
+            text(
+                """
+                SELECT
+                    current_database(),
+                    current_user,
+                    version()
+                """
+            )
+        ).one()
 
-database_url = URL.create(
-    drivername="postgresql+psycopg",
-    username=os.getenv("POSTGRES_USER"),
-    password=os.getenv("POSTGRES_PASSWORD"),
-    host=os.getenv("POSTGRES_HOST"),
-    port=int(os.getenv("POSTGRES_PORT", "5432")),
-    database=os.getenv("POSTGRES_DB"),
-)
+        print(f"Connected to database: {result[0]}")
+        print(f"Connected as user: {result[1]}")
+        print(f"PostgreSQL version: {result[2]}")
 
-engine = create_engine(database_url)
+    engine.dispose()
 
-with engine.connect() as connection:
-    result = connection.execute(
-        text("SELECT current_database(), current_user, version();")
-    ).one()
 
-print(f"Connected to database: {result[0]}")
-print(f"Connected as user: {result[1]}")
-print(f"PostgreSQL version: {result[2]}")
+if __name__ == "__main__":
+    main()
