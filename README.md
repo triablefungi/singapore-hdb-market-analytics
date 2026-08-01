@@ -44,25 +44,71 @@ The project currently includes:
 
 ## Project structure
 
-```text
-data/
-├── raw/                    # Original source data
-└── processed/              # Cleaned datasets
+singapore-hdb-market-analytics/
+|
+|-- data/
+|   |-- raw/
+|   |   |-- .gitkeep
+|   |   |-- hdb_rental.csv
+|   |   |-- hdb_resale.csv
+|   |   `-- mrt_exits.geojson
+|   `-- processed/
+|       |-- .gitkeep
+|       |-- hdb_rental_clean.csv
+|       |-- hdb_resale_clean.csv
+|       `-- mrt_exits_clean.csv
+|
+|-- sql/
+|   `-- analysis/
+|       |-- 01_fully_adjusted_yield_exceptions.sql
+|       |-- 02_annual_market_yields.sql
+|       |-- 03_2025_yield_compression_summary.sql
+|       `-- 04_2025_yield_change_details.sql
+|
+|-- src/
+|   |-- clean_data.py
+|   |-- config.py
+|   |-- database.py
+|   |-- download_data.py
+|   |-- init_db.py
+|   |-- load_data.py
+|   |-- models.py
+|   `-- test_connection.py
+|
+|-- .env.example
+|-- .gitignore
+|-- README.md
+`-- requirements.txt
 
-docs/
-└── data_quality.md         # Data-quality findings and cleaning decisions
+## Methodology
 
-src/
-├── acquire_data.py         # Downloads source datasets
-├── clean_data.py           # Cleans and validates raw data
-├── config.py               # Project paths and environment settings
-├── database.py             # Shared SQLAlchemy database engine
-├── init_db.py              # Initializes the PostgreSQL schema
-├── load_data.py            # Loads cleaned data into PostgreSQL
-├── models.py               # SQLAlchemy table definitions
-├── profile_data.py         # Profiles source-data quality
-└── test_connection.py      # Tests the PostgreSQL connection
-```
+1. Acquire the HDB resale, rental and MRT-location datasets.
+2. Clean and validate the raw data before loading it into PostgreSQL.
+3. Calculate annual median resale prices and monthly rents by town and flat type.
+4. Estimate gross rental yield using:
+
+   `Median monthly rent x 12 / median resale price x 100`
+
+5. Compare 2024 and 2025 results using only combinations with at least 50 resale records and 50 rental records in both years.
+6. Investigate apparent yield increases for changes in lease-age and street composition.
+7. Apply fixed 2024 lease-band and street-level weights to the remaining exceptions.
+
+Gross rental yield is used as a comparative market indicator. It does not account for financing costs, taxes, maintenance, vacancies or other ownership expenses.
+
+## Key Findings
+
+Among the 88 town-flat type combinations meeting the minimum sample-size requirement:
+
+- 83 combinations (94.32%) recorded declining gross rental yields from 2024 to 2025.
+- 5 combinations (5.68%) initially appeared to record rising yields.
+- After controlling for lease-age and street composition using fixed 2024 weights, only 2 combinations retained positive yield changes.
+
+| Town and flat type | Adjusted yield 2024 | Adjusted yield 2025 | Change |
+|---|---:|---:|---:|
+| Geylang - 5 Room | 5.12% | 5.42% | +0.30 percentage points |
+| Bukit Batok - Executive | 5.23% | 5.31% | +0.08 percentage points |
+
+The results indicate broad rental-yield compression across the eligible HDB market segments in 2025. They also demonstrate why apparent changes should be tested for differences in the underlying property and rental mix before being interpreted as genuine market movements.
 
 ## Local setup
 
@@ -115,4 +161,4 @@ The loader validates table columns and row counts and prevents accidental duplic
 
 ## Project status
 
-Data acquisition, profiling, cleaning, validation, database modelling, and PostgreSQL loading are complete. Exploratory analysis, MRT proximity analysis, modelling, and dashboard development are in progress.
+Data acquisition, profiling, cleaning, validation, database modelling, PostgreSQL loading, and the core SQL market analysis are complete. The completed analysis covers annual gross rental yields, 2025 yield compression, minimum sample-size filtering, and adjusted exception testing for lease-age and street composition. MRT proximity analysis, predictive modelling, and dashboard development remain planned.
