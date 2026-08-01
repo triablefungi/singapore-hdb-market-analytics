@@ -36,10 +36,27 @@ DISTANCE_LABELS = [
     "over-1.2km",
 ]
 
+FLAT_TYPE_MAPPING = {
+    "1-ROOM": "1 ROOM",
+    "2-ROOM": "2 ROOM",
+    "3-ROOM": "3 ROOM",
+    "4-ROOM": "4 ROOM",
+    "5-ROOM": "5 ROOM",
+    "1 ROOM": "1 ROOM",
+    "2 ROOM": "2 ROOM",
+    "3 ROOM": "3 ROOM",
+    "4 ROOM": "4 ROOM",
+    "5 ROOM": "5 ROOM",
+    "EXECUTIVE": "EXECUTIVE",
+    "MULTI-GENERATION": "MULTI-GENERATION",
+}
+
+
 COMMON_FEATURE_COLUMNS = [
     "calendar_year",
     "calendar_month",
     "calendar_quarter",
+    "flat_type_normalised",
     "train_distance_band",
     "train_within_800m",
 ]
@@ -86,6 +103,15 @@ def add_common_features(
 
     featured["calendar_quarter"] = (
         dates.dt.quarter.astype("int64")
+    )
+
+    featured["flat_type_normalised"] = (
+        featured["flat_type"]
+        .astype("string")
+        .str.strip()
+        .str.upper()
+        .map(FLAT_TYPE_MAPPING)
+        .astype("string")
     )
 
     featured["train_distance_band"] = (
@@ -136,6 +162,15 @@ def add_common_features(
         .astype("bool")
     )
 
+    expected_flat_type = (
+        data["flat_type"]
+        .astype("string")
+        .str.strip()
+        .str.upper()
+        .map(FLAT_TYPE_MAPPING)
+        .astype("string")
+    )
+
     checks = {
         "Expected row count": (
             len(featured) == expected_rows
@@ -173,6 +208,16 @@ def add_common_features(
         "Calendar quarters match source dates": (
             featured["calendar_quarter"]
             .eq(dates.dt.quarter)
+            .all()
+        ),
+        "Normalised flat types are complete": (
+            featured["flat_type_normalised"]
+            .notna()
+            .all()
+        ),
+        "Normalised flat types match source": (
+            featured["flat_type_normalised"]
+            .eq(expected_flat_type)
             .all()
         ),
         "Distance bands match distances": (
@@ -214,6 +259,14 @@ def add_common_features(
             f"{name}: "
             f"{'PASS' if passed else 'FAIL'}"
         )
+
+    print("\nNormalised flat types:")
+    print(
+        featured["flat_type_normalised"]
+        .value_counts()
+        .sort_index()
+        .to_string()
+    )
 
     print("\nTrain-distance bands:")
     print(
