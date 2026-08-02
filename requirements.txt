@@ -4,6 +4,7 @@ colorama==0.4.6
 greenlet==3.5.4
 idna==3.18
 iniconfig==2.3.0
+matplotlib==3.11.1
 numpy==2.5.1
 packaging==26.2
 pandas==3.0.5
@@ -18,6 +19,7 @@ python-dotenv==1.2.2
 pyproj==3.7.2
 pyshp==3.1.6
 requests==2.34.2
+seaborn==0.13.2
 six==1.17.0
 SQLAlchemy==2.0.51
 typing_extensions==4.16.0
