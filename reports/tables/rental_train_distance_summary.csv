@@ -1,0 +1,6 @@
+train_distance_band,median_monthly_rent,median_distance_km,record_count
+0-400m,3000.00,0.27,73014
+400-800m,2800.00,0.57,85400
+800m-1.2km,2700.00,0.94,33213
+over-1.2km,2800.00,1.42,12061
+unmatched,1700.00,,37

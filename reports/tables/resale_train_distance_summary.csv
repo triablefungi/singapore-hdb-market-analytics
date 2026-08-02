@@ -1,0 +1,5 @@
+train_distance_band,median_resale_price,median_distance_km,record_count
+0-400m,524000.00,0.26,81145
+400-800m,500000.00,0.58,94384
+800m-1.2km,465000.00,0.94,43474
+over-1.2km,500000.00,1.41,17956
